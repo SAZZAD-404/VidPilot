@@ -112,7 +112,7 @@ const Register = () => {
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
               <Video className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold text-foreground">VidFlow</span>
+            <span className="text-2xl font-bold text-foreground">VidPilot</span>
           </Link>
 
           <h1 className="text-3xl font-bold mb-2 text-foreground">Create your account</h1>

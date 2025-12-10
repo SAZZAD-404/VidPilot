@@ -70,7 +70,7 @@ const Login = () => {
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
               <Video className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold text-foreground">VidFlow</span>
+            <span className="text-2xl font-bold text-foreground">VidPilot</span>
           </Link>
 
           <h1 className="text-3xl font-bold mb-2 text-foreground">Welcome back</h1>
@@ -177,7 +177,7 @@ const Login = () => {
               Create stunning videos with AI
             </h2>
             <p className="text-muted-foreground mb-6">
-              Join thousands of creators using VidFlow to automate their content creation and grow their audience.
+              Join thousands of creators using VidPilot to automate their content creation and grow their audience.
             </p>
             <div className="flex items-center gap-4">
               <div className="flex -space-x-3">

@@ -245,7 +245,7 @@ const Connections = () => {
       >
         <h3 className="text-lg font-semibold text-foreground mb-2">About Connections</h3>
         <p className="text-muted-foreground text-sm mb-4">
-          When you connect a social media account, VidFlow gets permission to post content on your behalf and access analytics. 
+          When you connect a social media account, VidPilot gets permission to post content on your behalf and access analytics. 
           Your credentials are encrypted and stored securely. You can disconnect anytime.
         </p>
         <div className="flex items-center gap-2 text-sm text-primary">
