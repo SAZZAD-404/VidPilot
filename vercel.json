@@ -1,0 +1,19 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "vite",
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "0 * * * *"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/cron",
+      "destination": "https://your-project-ref.supabase.co/functions/v1/run-cron"
+    }
+  ]
+}
