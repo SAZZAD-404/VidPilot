@@ -7,7 +7,8 @@ import {
   Plus,
   ArrowRight,
   FileText,
-  Download
+  Download,
+  Video
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -104,6 +105,8 @@ const DashboardHome = () => {
         return Sparkles;
       case 'social_post':
         return Hash;
+      case 'video':
+        return Video;
       case 'export':
         return Download;
       default:
@@ -117,6 +120,8 @@ const DashboardHome = () => {
         return 'text-primary';
       case 'social_post':
         return 'text-purple-500';
+      case 'video':
+        return 'text-red-500';
       case 'export':
         return 'text-blue-500';
       default:
@@ -199,20 +204,20 @@ const DashboardHome = () => {
               <p className="text-sm text-muted-foreground">Full post variations</p>
             </div>
           </Link>
+
+          <Link to="/dashboard/youtube-stories">
+            <div className="p-4 rounded-lg bg-secondary/30 border border-border hover:border-primary/50 transition-all cursor-pointer group">
+              <Video className="w-8 h-8 text-red-500 mb-3 group-hover:scale-110 transition-transform" />
+              <h3 className="font-semibold text-foreground mb-1">YouTube Stories</h3>
+              <p className="text-sm text-muted-foreground">Engaging video stories</p>
+            </div>
+          </Link>
           
           <Link to="/dashboard/library">
             <div className="p-4 rounded-lg bg-secondary/30 border border-border hover:border-primary/50 transition-all cursor-pointer group">
               <Library className="w-8 h-8 text-accent mb-3 group-hover:scale-110 transition-transform" />
               <h3 className="font-semibold text-foreground mb-1">Caption History</h3>
               <p className="text-sm text-muted-foreground">View all generated captions</p>
-            </div>
-          </Link>
-
-          <Link to="/dashboard/settings">
-            <div className="p-4 rounded-lg bg-secondary/30 border border-border hover:border-primary/50 transition-all cursor-pointer group">
-              <TrendingUp className="w-8 h-8 text-blue-500 mb-3 group-hover:scale-110 transition-transform" />
-              <h3 className="font-semibold text-foreground mb-1">Upgrade Plan</h3>
-              <p className="text-sm text-muted-foreground">Unlimited access</p>
             </div>
           </Link>
         </div>

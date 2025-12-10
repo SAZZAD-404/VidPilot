@@ -21,6 +21,7 @@ const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: Sparkles, label: "Caption Generator", href: "/dashboard/captions" },
   { icon: MessageSquare, label: "Social Posts", href: "/dashboard/social-posts" },
+  { icon: Video, label: "YouTube Stories", href: "/dashboard/youtube-stories" },
   { icon: Library, label: "History", href: "/dashboard/history" },
   { icon: Crown, label: "Subscription", href: "/dashboard/subscription" },
   { icon: Settings, label: "Settings", href: "/dashboard/settings" },

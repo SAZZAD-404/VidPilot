@@ -16,6 +16,7 @@ import Settings from "./pages/dashboard/Settings";
 import CaptionGenerator from "./pages/dashboard/CaptionGenerator";
 import SavedCaptions from "./pages/dashboard/SavedCaptions";
 import SocialPostGenerator from "./pages/dashboard/SocialPostGenerator";
+import YouTubeStoryGenerator from "./pages/dashboard/YouTubeStoryGenerator";
 import History from "./pages/dashboard/History";
 import Subscription from "./pages/dashboard/Subscription";
 
@@ -40,6 +41,7 @@ const App = () => (
               <Route index element={<DashboardHome />} />
               <Route path="captions" element={<CaptionGenerator />} />
               <Route path="social-posts" element={<SocialPostGenerator />} />
+              <Route path="youtube-stories" element={<YouTubeStoryGenerator />} />
               <Route path="history" element={<History />} />
               <Route path="library" element={<SavedCaptions />} />
               <Route path="subscription" element={<Subscription />} />

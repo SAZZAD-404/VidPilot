@@ -1,7 +1,7 @@
 // Real AI-Powered Caption Generator using HuggingFace
 // Hybrid approach: Falls back to rule-based if API fails
 
-import { generateCaptions, type CaptionOptions, type CaptionResult } from './captionAdapter';
+import { type CaptionOptions, type CaptionResult } from './captionAdapter';
 
 // AI Model URLs
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
@@ -9,10 +9,7 @@ const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models/mistral
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 const ZAI_API_URL = 'https://api.z.ai/v1/chat/completions';
 
-interface AICaptionOptions extends CaptionOptions {
-  useAI?: boolean;
-  subject: string;
-}
+
 
 // Generate AI-powered captions
 export async function generateAICaptions(
@@ -21,7 +18,6 @@ export async function generateAICaptions(
   count: number = 10,
   useAI: boolean = true
 ): Promise<CaptionResult[]> {
-  const { platform, tone, language, length, includeHashtags, includeCTA } = options;
 
   // Check which AI model to use
   const zaiApiKey = import.meta.env.VITE_ZAI_API_KEY;
@@ -221,144 +217,23 @@ export async function generateAICaptions(
     // If parsing failed, return at least some captions
     if (captions.length === 0) {
       console.error('AI parsing completely failed');
-      throw new Error('Failed to parse AI response. Please try again.');
+      console.error('Raw AI response:', aiText.substring(0, 1000));
+      throw new Error('Failed to parse AI response. The AI may have returned an unexpected format.');
     }
+    
+    console.log('✅ Successfully generated', captions.length, 'caption(s)');
 
     // Return whatever we got (even if less than requested)
     return captions.slice(0, count);
   } catch (error) {
     console.error('AI caption generation error:', error);
     
-    // Smart fallback: Generate professional captions without AI
-    console.log('🛡️ USING SMART FALLBACK GENERATOR (Priority #5 - Always Works!)');
-    return generateSmartFallbackCaptions(subject, options, count);
+    // No fallback - throw error to show user that AI is required
+    throw new Error('AI generation failed. Please check your API keys and try again.');
   }
 }
 
-// Smart fallback caption generator (no API needed) - Professional & Dynamic
-function generateSmartFallbackCaptions(
-  subject: string,
-  options: CaptionOptions,
-  count: number
-): CaptionResult[] {
-  const { platform, tone, language, includeHashtags, includeCTA } = options;
-  const captions: CaptionResult[] = [];
-  
-  // Extract key words from subject for better hashtags
-  const subjectWords = subject.toLowerCase().split(/\s+/).filter(w => w.length > 3);
-  const subjectHashtags = subjectWords.slice(0, 3).map(w => w.replace(/[^a-z0-9]/g, ''));
-  
-  // Professional caption generators by tone
-  const generators = {
-    casual: [
-      `${subject} hits different 💯 Can't stop thinking about it!`,
-      `Just experienced ${subject} and wow... absolutely amazing ✨`,
-      `${subject} vibes are unmatched 🔥 Who else feels this?`,
-      `Living for these ${subject} moments 💫 Pure magic!`,
-      `${subject} is everything I needed today 🌟`,
-      `Can't get enough of ${subject} lately 😍 It's become my favorite!`,
-      `${subject} making every day better ☀️ Grateful for this!`,
-      `This ${subject} energy is exactly what I needed 💪`,
-      `${subject} = instant happiness 🎉 Every single time!`,
-      `Completely obsessed with ${subject} right now 💖 And I'm not sorry!`
-    ],
-    professional: [
-      `${subject}: A Comprehensive Analysis\n\nRecent market research indicates a 47% increase in adoption rates. Our data-driven approach reveals three critical success factors that industry leaders are leveraging. Key findings suggest organizations implementing these strategies see 3x ROI within 18 months.\n\nMethodology: Cross-sectional analysis of 500+ case studies across Fortune 500 companies.`,
-      `The Strategic Impact of ${subject} on Modern Business Operations\n\nExecutive Summary: Our Q4 analysis demonstrates ${subject} is fundamentally reshaping competitive dynamics. Organizations that prioritize this see 65% higher customer retention and 40% improved operational efficiency.\n\nData Source: McKinsey Global Institute, Harvard Business Review.`,
-      `${subject}: Evidence-Based Best Practices for Sustainable Growth\n\nOur research team analyzed 1,000+ implementations to identify proven success patterns. Results show companies following these frameworks achieve 2.5x faster market penetration and 58% higher profit margins.\n\nPeer-reviewed findings published in Journal of Business Strategy.`,
-      `Leveraging ${subject} for Competitive Advantage: A Strategic Framework\n\nIndustry benchmarking reveals top performers allocate 23% more resources here. Our proprietary analysis identifies five critical pillars that drive measurable outcomes. Early adopters report 89% satisfaction rates.\n\nMethodology: Longitudinal study spanning 36 months, N=750 organizations.`,
-      `The Future of ${subject}: Trends Shaping the Next Decade\n\nForward-looking analysis by leading economists predicts 156% market growth by 2030. Organizations positioning themselves now will capture disproportionate value. Our forecast model shows 73% probability of industry disruption.\n\nSource: Gartner Research, Deloitte Insights, PwC Global Trends.`,
-      `${subject} Excellence: Quantifiable Strategies for Market Leadership\n\nPerformance metrics from 300+ high-growth companies reveal consistent patterns. Implementation of these proven methodologies correlates with 91% higher stakeholder value and 67% improved brand equity.\n\nValidated through rigorous statistical analysis (p<0.01, CI 95%).`,
-      `Transforming ${subject} into Measurable Business Value\n\nOur comprehensive meta-analysis of 2,000+ data points identifies optimal resource allocation strategies. Organizations following this framework report 4.2x return on investment and 52% reduction in time-to-market.\n\nPublished in MIT Sloan Management Review.`,
-      `${subject} Mastery: Advanced Insights for C-Suite Executives\n\nExecutive briefing based on proprietary research across 15 industries. Key performance indicators show 78% correlation between strategic focus here and market capitalization growth. Board-level implications discussed.\n\nSource: Boston Consulting Group, Bain & Company analysis.`,
-      `Understanding ${subject}: Critical Success Factors for Long-Term Value Creation\n\nLongitudinal research spanning 5 years reveals sustainable competitive advantages. Companies excelling here demonstrate 3.8x higher employee engagement and 61% better innovation outcomes.\n\nMethodology: Mixed-methods research, validated by external auditors.`,
-      `${subject} Innovation at Scale: How Industry Leaders Stay Ahead\n\nBenchmarking study of top 100 global enterprises shows consistent investment patterns. Organizations dedicating strategic resources here achieve 94% higher customer lifetime value and dominate market share.\n\nData: Bloomberg Terminal, S&P Capital IQ, proprietary algorithms.`
-    ],
-    funny: [
-      `Me trying to explain ${subject} to my friends: *gestures wildly* 😂`,
-      `${subject} got me acting like a whole different person 🤪`,
-      `POV: You just discovered ${subject} and your life will never be the same 🎭`,
-      `${subject} at 3am hits different and I have questions 😅`,
-      `Nobody: ... Absolutely nobody: ... Me: Let me tell you about ${subject} 🤣`,
-      `${subject} is officially my entire personality now 💀 No regrets!`,
-      `When ${subject} makes perfect sense but also no sense at all 🧠`,
-      `${subject} energy is unmatched and slightly concerning 😎`,
-      `Living my best ${subject} life and it's beautifully chaotic 🎪`,
-      `${subject} but make it ✨chaotic good✨ ⚡`
-    ],
-    emotional: [
-      `${subject} reminds me why I started this journey. Every moment matters 💙`,
-      `Finding unexpected beauty in ${subject} every single day 🌸 It's the little things.`,
-      `${subject} taught me more about myself than I ever imagined 🦋 Growth is beautiful.`,
-      `Deeply grateful for ${subject} and everything it brings to my life 🙏`,
-      `${subject} fills my heart with pure joy and purpose ❤️ This is what living feels like.`,
-      `The magic of ${subject} never fades, it only grows stronger ✨`,
-      `${subject} has become my sanctuary, my happy place 🌈 Peace found here.`,
-      `Cherishing every precious ${subject} moment like the gift it is 💕`,
-      `${subject} speaks directly to my soul in ways words can't capture 🌙`,
-      `Forever thankful for ${subject} and the journey it's taken me on 🌻`
-    ],
-    minimal: [
-      `${subject}.`,
-      `${subject} ✨`,
-      `Simply ${subject}`,
-      `${subject} 🤍`,
-      `Pure ${subject}`,
-      `${subject} essence`,
-      `${subject} 💫`,
-      `Just ${subject}`,
-      `${subject} ◦`,
-      `${subject} —`
-    ]
-  };
-  
-  // Platform-specific hashtags
-  const platformHashtags: Record<string, string[]> = {
-    instagram: ['instagood', 'photooftheday', 'love', 'beautiful', 'happy', 'instadaily', 'lifestyle', 'inspiration'],
-    tiktok: ['fyp', 'foryou', 'viral', 'trending', 'foryoupage', 'tiktok', 'trend', 'explore'],
-    linkedin: ['business', 'professional', 'career', 'success', 'leadership', 'growth', 'innovation', 'strategy'],
-    twitter: ['trending', 'viral', 'thread', 'news', 'update', 'breaking', 'discussion', 'community'],
-    youtube: ['youtube', 'video', 'subscribe', 'content', 'creator', 'vlog', 'tutorial', 'educational']
-  };
-  
-  // CTAs by platform
-  const ctas: Record<string, string[]> = {
-    instagram: ['Double tap if you agree! 💕', 'Save this for later! 📌', 'Tag someone who needs this! 🏷️', 'Share your thoughts below! 💬', 'Follow for more! ✨'],
-    tiktok: ['Drop a ❤️ if you relate!', 'Duet this! 🎵', 'Stitch your reaction! 🎬', 'Follow for Part 2! 👀', 'Comment your thoughts! 💭'],
-    linkedin: ['What are your thoughts? Share below.', 'Connect with me for more insights.', 'Repost if you found this valuable.', 'Join the conversation in comments.', 'Follow for more professional content.'],
-    twitter: ['RT if you agree!', 'Reply with your take!', 'Quote tweet your thoughts!', 'Join the thread below!', 'Follow for more updates!'],
-    youtube: ['Like and subscribe for more!', 'Drop a comment below!', 'Hit the bell for notifications!', 'Share with your friends!', 'Check the description for links!']
-  };
-  
-  const selectedGenerators = generators[tone] || generators.casual;
-  const baseHashtags = platformHashtags[platform] || platformHashtags.instagram;
-  const platformCTAs = ctas[platform] || ctas.instagram;
-  
-  // Generate unique, professional captions
-  for (let i = 0; i < Math.min(count, selectedGenerators.length); i++) {
-    let text = selectedGenerators[i];
-    
-    // Add CTA if requested
-    if (includeCTA && platformCTAs[i]) {
-      text += `\n\n${platformCTAs[i]}`;
-    }
-    
-    // Generate relevant hashtags
-    const hashtags = includeHashtags 
-      ? [...subjectHashtags, ...baseHashtags.slice(i * 2, (i * 2) + 5)].slice(0, 8)
-      : [];
-    
-    captions.push({
-      text,
-      hashtags,
-      cta: includeCTA ? platformCTAs[i] : '',
-      characterCount: text.length,
-      readabilityScore: 85,
-    });
-  }
-  
-  return captions;
-}
+
 
 // Build AI prompt for captions
 function buildAICaptionPrompt(subject: string, options: CaptionOptions, count: number): string {
@@ -390,49 +265,40 @@ function buildAICaptionPrompt(subject: string, options: CaptionOptions, count: n
     ? 'Generate in Bengali (বাংলা) language with appropriate Bengali expressions.'
     : 'Generate in English language.';
 
-  return `You are an expert ${platform} content strategist with 10+ years of experience creating viral content. Your captions consistently achieve 10x engagement rates.
+  return `You are a senior creative director and award-winning social media strategist with 12+ years of experience writing high-performance captions for global brands. Your writing style is human-like, emotionally intelligent, and audience-aware.
 
-🎯 TASK: Create ${count} scroll-stopping captions about "${subject}"
+🎯 OBJECTIVE:
+Generate 1 deeply polished, scroll-stopping caption about: "${subject}"
 
-📋 SPECIFICATIONS:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Platform: ${platform.toUpperCase()}
-Style: ${platformRules[platform]}
-Tone: ${tone.toUpperCase()} - ${toneGuide[tone]}
-Length: ${lengthGuide[length]}
-Language: ${language === 'bengali' ? 'বাংলা (Bengali) - স্বাভাবিক কথোপকথন' : 'English - Natural & Conversational'}
-${includeHashtags ? 'Hashtags: 5-8 trending, relevant tags' : 'Hashtags: None'}
-${includeCTA ? 'CTA: Include compelling call-to-action' : 'CTA: Not required'}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+The caption must feel premium, intentional, aesthetic, and algorithm-friendly.
 
-✨ QUALITY REQUIREMENTS:
-1. Write like a human expert, NOT like AI
-2. Start with a powerful hook that stops scrolling
-3. Use ${platform}-appropriate emojis strategically
-4. Make every word count - no fluff
-5. Create emotional connection with audience
-6. Each caption must be 100% unique
-7. Sound natural, authentic, and relatable
-8. Include specific details about "${subject}"
-9. Use storytelling when appropriate
-10. Optimize for ${platform} algorithm
+──────────────────────────STYLE & RULES──────────────────────────
+• Platform style: ${platform.toUpperCase()} → ${platformRules[platform]}
+• Tone: ${tone.toUpperCase()} → ${toneGuide[tone]}
+• Length: ${lengthGuide[length]}
+• Language: ${languageNote}
+• Structure: Start with a hook, build emotional connection, end clean.
+• No AI tone. No generic phrases. No robotic patterns.
+• Captions must feel crafted, human, narrative-driven.
+• Mix micro-storytelling + high emotional resonance.
+• Avoid cliches and filler words.
+• Use emojis sparingly and purposefully (if relevant).
+${includeHashtags ? '• Hashtags enabled → 4–7 ultra-clean, niche-specific hashtags.' : '• No hashtags required.'}
+${includeCTA ? '• CTA enabled → natural, soft, non-salesy CTA.' : '• No CTA required.'}
 
-🎨 CREATIVE GUIDELINES:
-• ${tone === 'professional' ? 'Use data, statistics, and authoritative language' : ''}
-• ${tone === 'casual' ? 'Be relatable, friendly, and conversational' : ''}
-• ${tone === 'funny' ? 'Use humor, wit, and entertainment value' : ''}
-• ${tone === 'emotional' ? 'Create deep emotional resonance and inspiration' : ''}
-• ${tone === 'minimal' ? 'Be elegant, concise, and impactful' : ''}
-• Understand ${platform} culture and trends
-• Write for the target audience mindset
-• Make "${subject}" the hero of the story
+──────────────────────────OUTPUT FORMAT (STRICT)──────────────────────────
+Return ONLY this format:
 
-📝 OUTPUT FORMAT (Clean bullet list):
-* [Caption 1 with full text and context]${includeHashtags ? ' #tag1 #tag2 #tag3' : ''}
-* [Caption 2 with full text and context]${includeHashtags ? ' #tag4 #tag5 #tag6' : ''}
-* [Caption 3 with full text and context]${includeHashtags ? ' #tag7 #tag8 #tag9' : ''}
+CAPTION:
+{text}
+${includeHashtags ? 'HASHTAGS: #tag #tag #tag' : ''}
+${includeCTA ? 'CTA: optional' : ''}
+${includeCTA ? 'CTA: optional' : ''}
 
-🚀 Generate ${count} exceptional, high-converting captions NOW:`;
+… continue for all captions …
+
+──────────────────────────NOW CREATE ${count} HIGH-END, BRAND-QUALITY CAPTIONS.──────────────────────────
+Make each line refined, modern, emotionally intelligent, and platform-optimized.`;
 }
 
 // Parse AI response into CaptionResult array
@@ -441,24 +307,40 @@ function parseAICaptionResponse(aiText: string, options: CaptionOptions): Captio
   
   console.log('Raw AI response:', aiText.substring(0, 500));
   
-  // Try multiple parsing strategies
+  // Strategy 1: Parse new structured format (CAPTION:)
+  const captionBlocks = aiText.split(/CAPTION:/i).filter(block => block.trim());
   
-  // Strategy 1: Look for structured format with markers
-  let parts = aiText.split('---CAPTION---').filter(p => p.trim());
-  
-  if (parts.length > 1) {
-    console.log('Using marker-based parsing');
-    for (const part of parts) {
+  if (captionBlocks.length >= 1) {
+    console.log('Using new structured format parsing');
+    for (const block of captionBlocks) {
       try {
-        const captionMatch = part.match(/CAPTION:\s*(.+?)(?=\n\s*HASHTAGS:|HASHTAGS:|CTA:|$)/s);
-        const hashtagsMatch = part.match(/HASHTAGS:\s*(.+?)(?=\n\s*CTA:|CTA:|$)/s);
-        const ctaMatch = part.match(/CTA:\s*(.+?)$/s);
-
-        if (captionMatch) {
-          let captionText = captionMatch[1].trim();
-          const hashtagsText = hashtagsMatch ? hashtagsMatch[1].trim() : '';
-          const cta = ctaMatch ? ctaMatch[1].trim() : '';
+        const lines = block.trim().split('\n').filter(line => line.trim());
+        if (lines.length === 0) continue;
+        
+        let captionText = '';
+        let hashtagsText = '';
+        let cta = '';
+        
+        // Parse each line in the block
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
           
+          if (line.startsWith('HASHTAGS:')) {
+            hashtagsText = line.replace('HASHTAGS:', '').trim();
+          } else if (line.startsWith('CTA:')) {
+            cta = line.replace('CTA:', '').trim();
+          } else if (!line.startsWith('HASHTAGS:') && !line.startsWith('CTA:') && line.length > 0) {
+            // This is caption text
+            if (captionText) {
+              captionText += '\n' + line;
+            } else {
+              captionText = line;
+            }
+          }
+        }
+        
+        if (captionText.length > 10) {
+          // Extract hashtags
           const allHashtags = new Set<string>();
           if (hashtagsText) {
             hashtagsText.split(/\s+/)
@@ -466,8 +348,11 @@ function parseAICaptionResponse(aiText: string, options: CaptionOptions): Captio
               .forEach(tag => allHashtags.add(tag.substring(1)));
           }
           
+          // Also check for hashtags in caption text
           const captionHashtags = captionText.match(/#\w+/g) || [];
           captionHashtags.forEach(tag => allHashtags.add(tag.substring(1)));
+          
+          // Remove hashtags from caption text if they exist at the end
           captionText = captionText.replace(/\s*#\w+(\s+#\w+)*\s*$/, '').trim();
 
           const hashtags = Array.from(allHashtags).slice(0, 10);
@@ -475,18 +360,66 @@ function parseAICaptionResponse(aiText: string, options: CaptionOptions): Captio
           const sentences = captionText.split(/[.!?]+/).filter(s => s.trim()).length || 1;
           const readabilityScore = Math.min(100, Math.max(0, 100 - (words / sentences) * 5));
 
-          if (captionText.length > 10) {
-            captions.push({
-              text: captionText,
-              hashtags,
-              cta,
-              characterCount: captionText.length,
-              readabilityScore: Math.round(readabilityScore),
-            });
-          }
+          captions.push({
+            text: captionText,
+            hashtags: options.includeHashtags ? hashtags : [],
+            cta: options.includeCTA ? cta : '',
+            characterCount: captionText.length,
+            readabilityScore: Math.round(readabilityScore),
+          });
         }
       } catch (error) {
-        console.error('Error parsing caption:', error);
+        console.error('Error parsing structured caption:', error);
+      }
+    }
+  }
+  
+  // Strategy 2: Fallback to old marker-based parsing
+  if (captions.length === 0) {
+    console.log('Trying fallback marker-based parsing');
+    let parts = aiText.split('---CAPTION---').filter(p => p.trim());
+    
+    if (parts.length > 1) {
+      for (const part of parts) {
+        try {
+          const captionMatch = part.match(/CAPTION:\s*(.+?)(?=\n\s*HASHTAGS:|HASHTAGS:|CTA:|$)/s);
+          const hashtagsMatch = part.match(/HASHTAGS:\s*(.+?)(?=\n\s*CTA:|CTA:|$)/s);
+          const ctaMatch = part.match(/CTA:\s*(.+?)$/s);
+
+          if (captionMatch) {
+            let captionText = captionMatch[1].trim();
+            const hashtagsText = hashtagsMatch ? hashtagsMatch[1].trim() : '';
+            const cta = ctaMatch ? ctaMatch[1].trim() : '';
+            
+            const allHashtags = new Set<string>();
+            if (hashtagsText) {
+              hashtagsText.split(/\s+/)
+                .filter(tag => tag.startsWith('#'))
+                .forEach(tag => allHashtags.add(tag.substring(1)));
+            }
+            
+            const captionHashtags = captionText.match(/#\w+/g) || [];
+            captionHashtags.forEach(tag => allHashtags.add(tag.substring(1)));
+            captionText = captionText.replace(/\s*#\w+(\s+#\w+)*\s*$/, '').trim();
+
+            const hashtags = Array.from(allHashtags).slice(0, 10);
+            const words = captionText.split(/\s+/).length;
+            const sentences = captionText.split(/[.!?]+/).filter(s => s.trim()).length || 1;
+            const readabilityScore = Math.min(100, Math.max(0, 100 - (words / sentences) * 5));
+
+            if (captionText.length > 10) {
+              captions.push({
+                text: captionText,
+                hashtags,
+                cta,
+                characterCount: captionText.length,
+                readabilityScore: Math.round(readabilityScore),
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Error parsing caption:', error);
+        }
       }
     }
   }
@@ -563,13 +496,99 @@ function parseAICaptionResponse(aiText: string, options: CaptionOptions): Captio
     }
   }
 
+  // Ultimate fallback: Create one caption from the entire response
+  if (captions.length === 0) {
+    console.log('Using ultimate fallback - creating caption from raw response');
+    
+    // Clean up the raw text
+    let cleanText = aiText
+      .replace(/CAPTION:/gi, '')
+      .replace(/HASHTAGS:/gi, '')
+      .replace(/CTA:/gi, '')
+      .replace(/\n+/g, ' ')
+      .trim();
+    
+    // Extract hashtags from anywhere in the text
+    const hashtagMatches = cleanText.match(/#\w+/g) || [];
+    const hashtags = hashtagMatches.map(tag => tag.substring(1)).slice(0, 5);
+    
+    // Remove hashtags from text
+    cleanText = cleanText.replace(/#\w+/g, '').replace(/\s+/g, ' ').trim();
+    
+    // Take first reasonable sentence/paragraph
+    const sentences = cleanText.split(/[.!?]+/).filter(s => s.trim().length > 10);
+    if (sentences.length > 0) {
+      cleanText = sentences.slice(0, 3).join('. ').trim();
+      if (!cleanText.endsWith('.') && !cleanText.endsWith('!') && !cleanText.endsWith('?')) {
+        cleanText += '.';
+      }
+    }
+    
+    if (cleanText.length > 10 && cleanText.length < 2000) {
+      const words = cleanText.split(/\s+/).length;
+      const readabilityScore = Math.min(100, Math.max(50, 100 - words * 2));
+      
+      captions.push({
+        text: cleanText,
+        hashtags: options.includeHashtags ? hashtags : [],
+        cta: options.includeCTA ? 'Engage with this post!' : '',
+        characterCount: cleanText.length,
+        readabilityScore: Math.round(readabilityScore),
+      });
+      
+      console.log('✅ Created fallback caption successfully');
+    }
+  }
+  
   console.log(`Parsed ${captions.length} captions successfully`);
   return captions;
 }
 
 // Check if AI is available
 export function isAIAvailable(): boolean {
-  return !!(import.meta.env.VITE_ZAI_API_KEY || import.meta.env.VITE_GROQ_API_KEY || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_HUGGINGFACE_API_KEY);
+  const hasZai = !!import.meta.env.VITE_ZAI_API_KEY;
+  const hasGroq = !!import.meta.env.VITE_GROQ_API_KEY;
+  const hasGemini = !!import.meta.env.VITE_GEMINI_API_KEY;
+  const hasHF = !!import.meta.env.VITE_HUGGINGFACE_API_KEY;
+  
+  console.log('AI Availability Check:', {
+    hasZai,
+    hasGroq,
+    hasGemini,
+    hasHF,
+    zaiKey: import.meta.env.VITE_ZAI_API_KEY ? `Present (${import.meta.env.VITE_ZAI_API_KEY.substring(0, 8)}...)` : 'Missing',
+    groqKey: import.meta.env.VITE_GROQ_API_KEY ? `Present (${import.meta.env.VITE_GROQ_API_KEY.substring(0, 8)}...)` : 'Missing',
+    geminiKey: import.meta.env.VITE_GEMINI_API_KEY ? `Present (${import.meta.env.VITE_GEMINI_API_KEY.substring(0, 8)}...)` : 'Missing',
+    hfKey: import.meta.env.VITE_HUGGINGFACE_API_KEY ? `Present (${import.meta.env.VITE_HUGGINGFACE_API_KEY.substring(0, 8)}...)` : 'Missing'
+  });
+  
+  return hasZai || hasGroq || hasGemini || hasHF;
+}
+
+// Test function for debugging
+export async function testCaptionGeneration(): Promise<boolean> {
+  try {
+    console.log('🧪 Testing caption generation...');
+    const testCaption = await generateAICaptions(
+      'morning coffee',
+      {
+        platform: 'instagram',
+        tone: 'casual',
+        language: 'english',
+        length: 'medium',
+        includeHashtags: true,
+        includeCTA: false
+      },
+      1,
+      true
+    );
+    
+    console.log('✅ Caption generation test successful!', testCaption);
+    return true;
+  } catch (error) {
+    console.error('❌ Caption generation test failed:', error);
+    return false;
+  }
 }
 
 // Get active AI model name

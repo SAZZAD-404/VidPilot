@@ -289,25 +289,24 @@ function generateSmartFallbackPosts(options: PostOptions): PostVariation[] {
   const ctas = platformCTAs[platform] || platformCTAs.instagram;
   const baseHashtags = platformHashtags[platform] || platformHashtags.instagram;
   
-  for (let i = 0; i < selectedGenerators.length; i++) {
-    let text = selectedGenerators[i];
-    const cta = includeCTA ? ctas[i] : '';
-    
-    // Add CTA if requested
-    if (cta) {
-      text += `\n\n${cta}`;
-    }
-    
-    // Generate relevant hashtags
-    const hashtags = [...topicHashtags, ...baseHashtags.slice(i * 2, (i * 2) + 5)].slice(0, 8);
-    
-    posts.push({
-      text,
-      hashtags,
-      cta,
-      characterCount: text.length,
-    });
+  // Generate only 1 post (first one from the selected generators)
+  let text = selectedGenerators[0];
+  const cta = includeCTA ? ctas[0] : '';
+  
+  // Add CTA if requested
+  if (cta) {
+    text += `\n\n${cta}`;
   }
+  
+  // Generate relevant hashtags
+  const hashtags = [...topicHashtags, ...baseHashtags.slice(0, 5)].slice(0, 8);
+  
+  posts.push({
+    text,
+    hashtags,
+    cta,
+    characterCount: text.length,
+  });
   
   return posts;
 }
@@ -340,7 +339,7 @@ function buildAIPrompt(options: PostOptions): string {
     marketing: 'promotional, sales-focused, CTA-heavy, conversion-oriented',
   };
 
-  return `You are an expert social media content creator specializing in ${platform} marketing. Generate 3 unique, high-converting social media posts.
+  return `You are an expert social media content creator specializing in ${platform} marketing. Generate 1 perfect, high-converting social media post.
 
 === USER SELECTIONS (MUST FOLLOW EXACTLY) ===
 Platform: ${platform.toUpperCase()} (${platformRules[platform]})
@@ -361,9 +360,8 @@ Call-to-Action: ${includeCTA ? 'YES - Include compelling CTA' : 'NO - No CTA nee
 7. HASHTAGS: Include 5-10 relevant, trending hashtags at the end
 8. EMOJIS: Use emojis that match ${platform} culture and ${tone} tone
 9. CTA: ${includeCTA ? 'MUST include a clear, compelling call-to-action that drives engagement' : 'DO NOT include any call-to-action'}
-10. UNIQUENESS: Each variation must be COMPLETELY DIFFERENT - different hooks, angles, and approaches
-11. ENGAGEMENT: Make it scroll-stopping, shareable, and conversation-starting
-12. SEPARATOR: Use "---VARIATION---" between each post
+10. ENGAGEMENT: Make it scroll-stopping, shareable, and conversation-starting
+11. UNIQUENESS: Create a completely original, never-seen-before approach
 
 === PROFESSIONAL QUALITY STANDARDS ===
 ✓ GRAMMAR: Perfect grammar, spelling, and punctuation - zero errors allowed
@@ -399,64 +397,51 @@ GOOD (Aim for):
 "Last Tuesday, something unexpected happened with ${topic}. A member of our ${audience} community shared their story, and it reminded me why we do what we do at ${brand || 'our company'}. Let me share it with you..."
 (Storytelling, specific, emotional, brand integration)
 
-Format each variation exactly like this:
+Format exactly like this:
 POST: [your professional, polished post text here]
 HASHTAGS: #hashtag1 #hashtag2 #hashtag3
----VARIATION---
 
-CRITICAL: Each variation must be COMPLETELY UNIQUE with:
-- Variation 1: Use storytelling approach with personal narrative
-- Variation 2: Use data/facts approach with statistics or insights
-- Variation 3: Use emotional/inspirational approach with motivation
-- Different opening hooks for each
-- Different vocabulary and sentence structures
-- Different examples, scenarios, or case studies
-- NO repetition of ideas, phrases, or structures between variations
+APPROACH: Use storytelling with emotional connection and authentic brand voice
 
-Generate 3 COMPLETELY DIFFERENT variations now with PROFESSIONAL, PUBLICATION-READY QUALITY:`;
+Generate 1 PERFECT, PROFESSIONAL, PUBLICATION-READY POST now:`;
 }
 
 // Parse AI response into PostVariation array
 function parseAIResponse(aiText: string, options: PostOptions): PostVariation[] {
   const variations: PostVariation[] = [];
   
-  // Split by variation marker
-  const parts = aiText.split('---VARIATION---').filter(p => p.trim());
+  try {
+    // Extract POST and HASHTAGS from single response
+    const postMatch = aiText.match(/POST:\s*(.+?)(?=HASHTAGS:|$)/s);
+    const hashtagsMatch = aiText.match(/HASHTAGS:\s*(.+?)$/s);
 
-  for (const part of parts.slice(0, 3)) {
-    try {
-      // Extract POST and HASHTAGS
-      const postMatch = part.match(/POST:\s*(.+?)(?=HASHTAGS:|$)/s);
-      const hashtagsMatch = part.match(/HASHTAGS:\s*(.+?)$/s);
+    if (postMatch) {
+      let postText = postMatch[1].trim();
+      const hashtagsText = hashtagsMatch ? hashtagsMatch[1].trim() : '';
+      
+      // Extract hashtags
+      const hashtags = hashtagsText
+        .split(/\s+/)
+        .filter(tag => tag.startsWith('#'))
+        .map(tag => tag.substring(1))
+        .slice(0, 10);
 
-      if (postMatch) {
-        let postText = postMatch[1].trim();
-        const hashtagsText = hashtagsMatch ? hashtagsMatch[1].trim() : '';
-        
-        // Extract hashtags
-        const hashtags = hashtagsText
-          .split(/\s+/)
-          .filter(tag => tag.startsWith('#'))
-          .map(tag => tag.substring(1))
-          .slice(0, 10);
+      // Remove hashtags from post text if they're at the end
+      postText = postText.replace(/\s*#\w+(\s+#\w+)*\s*$/, '').trim();
 
-        // Remove hashtags from post text if they're at the end
-        postText = postText.replace(/\s*#\w+(\s+#\w+)*\s*$/, '').trim();
+      // Extract CTA if present
+      const ctaMatch = postText.match(/(👉|🔗|💬|📲|🔔|👍|🔄).*$/);
+      const cta = ctaMatch ? ctaMatch[0] : '';
 
-        // Extract CTA if present
-        const ctaMatch = postText.match(/(👉|🔗|💬|📲|🔔|👍|🔄).*$/);
-        const cta = ctaMatch ? ctaMatch[0] : '';
-
-        variations.push({
-          text: postText,
-          hashtags,
-          cta,
-          characterCount: postText.length,
-        });
-      }
-    } catch (error) {
-      console.error('Error parsing variation:', error);
+      variations.push({
+        text: postText,
+        hashtags,
+        cta,
+        characterCount: postText.length,
+      });
     }
+  } catch (error) {
+    console.error('Error parsing post:', error);
   }
 
   return variations;

@@ -7,25 +7,19 @@ import { isDemoMode, showDemoRestriction } from "@/lib/demoMode";
 import { hasCredits, useCredit, getCredits } from "@/lib/creditSystem";
 import CreditDisplay from "@/components/dashboard/CreditDisplay";
 import UpgradeModal from "@/components/dashboard/UpgradeModal";
-import AIStatusChecker from "@/components/dashboard/AIStatusChecker";
+
 import {
   Sparkles,
-  Image as ImageIcon,
-  Video,
-  Type,
   Copy,
   Download,
   RefreshCw,
-  Upload,
   Hash,
   MessageSquare,
-  Globe,
   Smile,
   Briefcase,
   Heart,
   Minus,
   Library,
-  Settings,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -36,8 +30,6 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useCaptions } from "@/hooks/useCaptions";
 import {
-  extractSubjectFromImage,
-  extractSubjectFromVideo,
   type Platform,
   type Tone,
   type Language,
@@ -54,11 +46,11 @@ import {
 import { Card } from "@/components/ui/card";
 
 const platforms: { value: Platform; label: string; icon: any }[] = [
-  { value: "instagram", label: "Instagram", icon: ImageIcon },
-  { value: "tiktok", label: "TikTok", icon: Video },
+  { value: "instagram", label: "Instagram", icon: MessageSquare },
+  { value: "tiktok", label: "TikTok", icon: MessageSquare },
   { value: "linkedin", label: "LinkedIn", icon: Briefcase },
   { value: "twitter", label: "Twitter/X", icon: MessageSquare },
-  { value: "youtube", label: "YouTube", icon: Video },
+  { value: "youtube", label: "YouTube", icon: MessageSquare },
 ];
 
 const tones: { value: Tone; label: string; icon: any }[] = [
@@ -80,23 +72,18 @@ const CaptionGenerator = () => {
     getUsageStats,
   } = useCaptions();
 
-  const [inputType, setInputType] = useState<"text" | "image" | "video">("text");
   const [textInput, setTextInput] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [videoUrl, setVideoUrl] = useState("");
   const [platform, setPlatform] = useState<Platform>("instagram");
   const [tone, setTone] = useState<Tone>("casual");
   const [language, setLanguage] = useState<Language>("english");
   const [length, setLength] = useState<"short" | "medium" | "long">("medium");
   const [includeHashtags, setIncludeHashtags] = useState(true);
   const [includeCTA, setIncludeCTA] = useState(true);
-  const [useAI, setUseAI] = useState(isAIAvailable());
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCaptions, setGeneratedCaptions] = useState<CaptionResult[]>([]);
   const [usageStats, setUsageStats] = useState<Record<string, number> | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [showAIStatus, setShowAIStatus] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (user) {
@@ -110,22 +97,7 @@ const CaptionGenerator = () => {
     setUsageStats(stats);
   };
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.type.startsWith("image/")) {
-        // Check file size (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-          toast.error("Image too large! Please select an image under 10MB");
-          return;
-        }
-        setImageFile(file);
-        toast.success(`Image selected: ${file.name}`);
-      } else {
-        toast.error("Please select an image file (JPG, PNG, GIF)");
-      }
-    }
-  };
+
 
   const handleGenerate = async () => {
     // Check demo mode (only if not logged in)
@@ -140,66 +112,20 @@ const CaptionGenerator = () => {
       return;
     }
 
-    let subject = "";
-
-    // Extract subject based on input type
-    if (inputType === "text") {
-      if (!textInput.trim()) {
-        toast.error("Please enter a topic or description");
-        return;
-      }
-      subject = textInput.trim();
-    } else if (inputType === "image") {
-      if (!imageFile) {
-        toast.error("Please select an image");
-        return;
-      }
-      
-      // Show analyzing message
-      toast.info("🔍 Analyzing image with AI...", { duration: 3000 });
-      
-      try {
-        subject = await extractSubjectFromImage(URL.createObjectURL(imageFile));
-        toast.success(`✅ Image analyzed: "${subject}"`);
-      } catch (error) {
-        console.error('Image analysis failed:', error);
-        toast.warning("⚠️ Using smart fallback for image analysis");
-        subject = await extractSubjectFromImage(URL.createObjectURL(imageFile));
-      }
-    } else if (inputType === "video") {
-      if (!videoUrl.trim()) {
-        toast.error("Please enter a video URL");
-        return;
-      }
-      
-      // Validate video URL
-      const urlPattern = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|tiktok\.com|instagram\.com|facebook\.com)/i;
-      if (!urlPattern.test(videoUrl.trim())) {
-        toast.error("Please enter a valid video URL (YouTube, TikTok, Instagram, Facebook)");
-        return;
-      }
-      
-      // Show analyzing message
-      toast.info("🔍 Analyzing video content...", { duration: 3000 });
-      
-      try {
-        subject = await extractSubjectFromVideo(videoUrl.trim());
-        toast.success(`✅ Video analyzed: "${subject}"`);
-      } catch (error) {
-        console.error('Video analysis failed:', error);
-        toast.warning("⚠️ Using smart fallback for video analysis");
-        subject = await extractSubjectFromVideo(videoUrl.trim());
-      }
+    // Validate text input
+    if (!textInput.trim()) {
+      toast.error("Please enter a topic or description");
+      return;
     }
+
+    const subject = textInput.trim();
 
     setIsGenerating(true);
     try {
-      // Show loading message based on mode
-      if (useAI) {
-        toast.info("Generating with AI... This may take 10-15 seconds");
-      }
+      // Show AI loading message
+      toast.info("🤖 Generating with AI... This may take 10-15 seconds");
 
-      // Generate captions using AI or rule-based
+      // Generate captions using AI only
       const captions = await generateAICaptions(
         subject,
         {
@@ -210,8 +136,8 @@ const CaptionGenerator = () => {
           includeHashtags,
           includeCTA,
         },
-        10,
-        useAI
+        1, // Generate only 1 perfect caption
+        true // Always use AI
       );
 
       setGeneratedCaptions(captions);
@@ -247,10 +173,10 @@ const CaptionGenerator = () => {
       await loadUsageStats();
       
       const remainingCredits = getCredits(user?.id);
-      toast.success(`Generated ${captions.length} ${useAI ? 'AI-powered' : 'quick'} captions! Credits: ${remainingCredits.remaining}/${remainingCredits.total}`);
+      toast.success(`✅ Generated perfect AI-powered caption! Credits: ${remainingCredits.remaining}/${remainingCredits.total}`);
     } catch (error: any) {
-      console.error("Caption generation error:", error);
-      toast.error("Failed to generate captions");
+      console.error("AI caption generation error:", error);
+      toast.error("❌ AI generation failed. Please check your API keys and try again.");
     } finally {
       setIsGenerating(false);
     }
@@ -321,15 +247,7 @@ const CaptionGenerator = () => {
               Create viral captions in seconds — powered by AI
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowAIStatus(!showAIStatus)}
-            className="flex items-center gap-2"
-          >
-            <Settings className="w-4 h-4" />
-            AI Status
-          </Button>
+
         </div>
       </motion.div>
 
@@ -342,64 +260,12 @@ const CaptionGenerator = () => {
         <CreditDisplay />
       </motion.div>
 
-      {/* AI Status Checker */}
-      {showAIStatus && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
-        >
-          <AIStatusChecker />
-        </motion.div>
-      )}
+
 
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Left Column - Input */}
         <div className="space-y-6">
-          {/* Input Type Selection */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="glass-card p-6"
-          >
-            <Label className="text-lg font-semibold mb-4">Input Type</Label>
-            <div className="grid grid-cols-3 gap-3">
-              <button
-                onClick={() => setInputType("text")}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  inputType === "text"
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                <Type className="w-6 h-6 mx-auto mb-2 text-primary" />
-                <p className="text-sm font-medium">Text</p>
-              </button>
-              <button
-                onClick={() => setInputType("image")}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  inputType === "image"
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                <ImageIcon className="w-6 h-6 mx-auto mb-2 text-primary" />
-                <p className="text-sm font-medium">Image</p>
-              </button>
-              <button
-                onClick={() => setInputType("video")}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  inputType === "video"
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                <Video className="w-6 h-6 mx-auto mb-2 text-primary" />
-                <p className="text-sm font-medium">Video</p>
-              </button>
-            </div>
-          </motion.div>
+
 
           {/* Input Area */}
           <motion.div
@@ -408,129 +274,16 @@ const CaptionGenerator = () => {
             transition={{ delay: 0.1 }}
             className="glass-card p-6"
           >
-            <Label className="text-lg font-semibold mb-4">
-              {inputType === "text" && "Enter Topic or Description"}
-              {inputType === "image" && "Upload Image"}
-              {inputType === "video" && "Video URL"}
-            </Label>
+            <Label className="text-lg font-semibold mb-4">Enter Topic or Description</Label>
+            
+            <Textarea
+              placeholder="E.g., 'Morning coffee routine' or 'Sunset at the beach'"
+              value={textInput}
+              onChange={(e) => setTextInput(e.target.value)}
+              className="min-h-[120px] bg-secondary border-border resize-none"
+            />
 
-            {inputType === "text" && (
-              <Textarea
-                placeholder="E.g., 'Morning coffee routine' or 'Sunset at the beach'"
-                value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
-                className="min-h-[120px] bg-secondary border-border resize-none"
-              />
-            )}
 
-            {inputType === "image" && (
-              <>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageSelect}
-                  className="hidden"
-                  id="image-upload"
-                />
-                
-                {imageFile ? (
-                  <div className="space-y-3">
-                    {/* Image Preview */}
-                    <div className="relative w-full h-48 border-2 border-primary/30 rounded-lg overflow-hidden bg-secondary/30">
-                      <img
-                        src={URL.createObjectURL(imageFile)}
-                        alt="Selected image"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => setImageFile(null)}
-                          className="bg-white/90 text-black hover:bg-white"
-                        >
-                          Remove Image
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    {/* Image Info */}
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-foreground font-medium">{imageFile.name}</span>
-                      <span className="text-muted-foreground">
-                        {(imageFile.size / 1024 / 1024).toFixed(1)} MB
-                      </span>
-                    </div>
-                    
-                    {/* Change Image Button */}
-                    <label
-                      htmlFor="image-upload"
-                      className="flex items-center justify-center w-full p-3 border border-border rounded-lg cursor-pointer hover:border-primary/50 transition-colors bg-secondary/30"
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      <span className="text-sm">Change Image</span>
-                    </label>
-                  </div>
-                ) : (
-                  <label
-                    htmlFor="image-upload"
-                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 transition-colors bg-secondary/30"
-                  >
-                    <div className="text-center">
-                      <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-foreground">Click to upload image</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        JPG, PNG, GIF (Max 10MB)
-                      </p>
-                      <p className="text-xs text-primary mt-1 font-medium">
-                        🤖 AI will analyze your image for better captions!
-                      </p>
-                    </div>
-                  </label>
-                )}
-              </>
-            )}
-
-            {inputType === "video" && (
-              <div className="space-y-3">
-                <Input
-                  placeholder="https://youtube.com/watch?v=... or https://tiktok.com/@..."
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  className="bg-secondary border-border"
-                />
-                
-                {/* Video URL Info */}
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <p>✅ Supported platforms:</p>
-                  <div className="grid grid-cols-2 gap-1 ml-4">
-                    <span>• YouTube & YouTube Shorts</span>
-                    <span>• TikTok videos</span>
-                    <span>• Instagram Reels</span>
-                    <span>• Facebook videos</span>
-                  </div>
-                  <p className="text-primary font-medium mt-2">
-                    🤖 AI will analyze video content for relevant captions!
-                  </p>
-                </div>
-                
-                {/* Video Preview (if valid URL) */}
-                {videoUrl && /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|tiktok\.com|instagram\.com|facebook\.com)/i.test(videoUrl) && (
-                  <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <Video className="w-4 h-4 text-primary" />
-                      <span className="text-sm font-medium text-primary">
-                        Valid video URL detected
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      AI will analyze this video when generating captions
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
           </motion.div>
 
           {/* Platform & Tone */}
@@ -631,19 +384,14 @@ const CaptionGenerator = () => {
               </label>
 
               {isAIAvailable() && (
-                <label className="flex items-center gap-3 p-3 rounded-lg bg-primary/10 border border-primary/30 cursor-pointer hover:bg-primary/20 transition-colors">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/10 border border-primary/30">
                   <Sparkles className="w-5 h-5 text-primary" />
                   <div className="flex-1">
-                    <span className="text-foreground font-medium block">AI-Powered Generation</span>
-                    <span className="text-xs text-muted-foreground">Better quality, takes 10-15 seconds</span>
+                    <span className="text-foreground font-medium block">🤖 AI-Powered Generation</span>
+                    <span className="text-xs text-muted-foreground">High-quality captions powered by advanced AI models</span>
                   </div>
-                  <input
-                    type="checkbox"
-                    checked={useAI}
-                    onChange={(e) => setUseAI(e.target.checked)}
-                    className="w-5 h-5 rounded accent-primary"
-                  />
-                </label>
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                </div>
               )}
             </div>
           </motion.div>
@@ -658,12 +406,12 @@ const CaptionGenerator = () => {
             {isGenerating ? (
               <>
                 <RefreshCw className="w-5 h-5 animate-spin" />
-                {useAI ? 'AI Generating...' : 'Generating...'}
+                🤖 AI Generating...
               </>
             ) : (
               <>
                 <Sparkles className="w-5 h-5" />
-                {useAI ? 'Generate with AI' : 'Generate Captions (Quick)'}
+                🚀 Generate Caption
               </>
             )}
           </Button>
@@ -673,35 +421,81 @@ const CaptionGenerator = () => {
             </p>
           )}
           {!isAIAvailable() && (
-            <p className="text-xs text-muted-foreground text-center">
-              💡 Add VITE_ZAI_API_KEY, VITE_GROQ_API_KEY, or VITE_GEMINI_API_KEY to .env for AI-powered generation
+            <p className="text-xs text-destructive text-center font-medium">
+              ⚠️ AI API Key Required! Add VITE_ZAI_API_KEY, VITE_GROQ_API_KEY, or VITE_GEMINI_API_KEY to .env file
             </p>
           )}
           
-          {/* AI Vision Status */}
-          {(inputType === "image" || inputType === "video") && (
-            <div className="text-xs text-center space-y-1">
-              {import.meta.env.VITE_GEMINI_API_KEY ? (
-                <p className="text-primary font-medium">
-                  🤖 Gemini Vision AI: Ready for {inputType} analysis
-                </p>
-              ) : (
-                <p className="text-muted-foreground">
-                  💡 Add VITE_GEMINI_API_KEY for advanced {inputType} AI analysis
-                </p>
-              )}
-              {import.meta.env.VITE_ZAI_API_KEY && (
-                <p className="text-purple-500 font-medium">
-                  ✨ Z.ai Premium: Enhanced conversational AI ready
-                </p>
-              )}
-            </div>
-          )}
+
         </div>
 
         {/* Right Column - Results */}
         <div className="space-y-6">
-          {generatedCaptions.length > 0 && (
+          {/* Loading Animation */}
+          {isGenerating && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              {/* AI Generation Status */}
+              <div className="glass-card p-6 text-center">
+                <div className="flex items-center justify-center mb-4">
+                  <RefreshCw className="w-8 h-8 text-primary animate-spin" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  🤖 Generating AI Captions...
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Creating 10 unique, scroll-stopping captions for you...
+                </p>
+                
+                {/* Progress Animation */}
+                <div className="mt-4 w-full bg-secondary rounded-full h-2">
+                  <div className="bg-primary h-2 rounded-full animate-pulse" style={{
+                    width: '60%',
+                    transition: 'width 3s ease-in-out'
+                  }}></div>
+                </div>
+                
+                <p className="text-xs text-muted-foreground mt-2">
+                  AI is analyzing your content...
+                </p>
+              </div>
+
+              {/* Loading Skeletons for Captions */}
+              <div className="space-y-4">
+                {[1,2,3,4,5].map(i => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="glass-card p-4"
+                  >
+                    <div className="space-y-3">
+                      <div className="w-full h-4 bg-muted/30 rounded animate-pulse"></div>
+                      <div className="w-4/5 h-4 bg-muted/30 rounded animate-pulse"></div>
+                      <div className="w-3/4 h-4 bg-muted/30 rounded animate-pulse"></div>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {[1,2,3,4].map(j => (
+                        <div key={j} className="w-16 h-6 bg-primary/20 rounded-full animate-pulse"></div>
+                      ))}
+                    </div>
+                    
+                    <div className="flex items-center gap-4 text-xs mt-3">
+                      <div className="w-20 h-3 bg-muted/30 rounded animate-pulse"></div>
+                      <div className="w-24 h-3 bg-muted/30 rounded animate-pulse"></div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {generatedCaptions.length > 0 && !isGenerating && (
             <>
               {/* Action Buttons */}
               <motion.div
@@ -722,7 +516,7 @@ const CaptionGenerator = () => {
               </motion.div>
 
               {/* Generated Captions */}
-              <div className="space-y-4 max-h-[800px] overflow-y-auto pr-2">
+              <div className="space-y-6 max-h-[800px] overflow-y-auto pr-2">
                 {generatedCaptions.map((caption, index) => (
                   <motion.div
                     key={index}
@@ -730,40 +524,89 @@ const CaptionGenerator = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <Card className="p-4 space-y-3 bg-secondary/30 border-border hover:border-primary/50 transition-colors">
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="text-sm text-foreground whitespace-pre-wrap flex-1">
-                          {caption.text}
-                        </p>
-                        <div className="flex gap-2 flex-shrink-0">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleCopyCaption(caption)}
-                            title="Copy to clipboard"
-                          >
-                            <Copy className="w-4 h-4" />
-                          </Button>
+                    <Card className="overflow-hidden bg-gradient-to-br from-background to-secondary/20 border-2 border-border hover:border-primary/30 transition-all duration-300 shadow-lg hover:shadow-xl">
+                      {/* Header */}
+                      <div className="bg-gradient-to-r from-primary/10 to-accent/10 px-5 py-3 border-b border-border/50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+                              {index + 1}
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-foreground text-sm">Caption Variation {index + 1}</h4>
+                              <p className="text-xs text-muted-foreground">
+                                {platform.charAt(0).toUpperCase() + platform.slice(1)} • {tone.charAt(0).toUpperCase() + tone.slice(1)} tone
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium border border-primary/20">
+                              ✨ Premium Quality
+                            </span>
+                          </div>
                         </div>
                       </div>
 
-                      {caption.hashtags.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {caption.hashtags.map((tag, i) => (
-                            <span
-                              key={i}
-                              className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary"
-                            >
-                              #{tag}
-                            </span>
-                          ))}
+                      {/* Content */}
+                      <div className="p-5 space-y-4">
+                        {/* Caption Text */}
+                        <div className="relative">
+                          <div className="absolute -left-2 top-0 w-1 h-full bg-gradient-to-b from-primary to-accent rounded-full opacity-30"></div>
+                          <div className="pl-4">
+                            <p className="text-foreground leading-relaxed whitespace-pre-wrap text-sm">
+                              {caption.text}
+                            </p>
+                          </div>
                         </div>
-                      )}
 
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>{caption.characterCount} characters</span>
-                        <span>•</span>
-                        <span>Readability: {caption.readabilityScore}/100</span>
+                        {/* Hashtags */}
+                        {caption.hashtags.length > 0 && (
+                          <div className="space-y-2">
+                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                              Trending Hashtags
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {caption.hashtags.map((tag, i) => (
+                                <span
+                                  key={i}
+                                  className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-gradient-to-r from-primary/10 to-accent/10 text-primary border border-primary/20 hover:border-primary/40 transition-colors"
+                                >
+                                  <span className="text-xs">#</span>
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Stats */}
+                        <div className="grid grid-cols-3 gap-4 pt-3 border-t border-border/50">
+                          <div className="text-center">
+                            <p className="text-sm font-bold text-foreground">{caption.characterCount}</p>
+                            <p className="text-xs text-muted-foreground">Characters</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-sm font-bold text-foreground">{caption.hashtags.length}</p>
+                            <p className="text-xs text-muted-foreground">Hashtags</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-sm font-bold text-primary">{caption.readabilityScore}/100</p>
+                            <p className="text-xs text-muted-foreground">Quality</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="bg-secondary/30 px-5 py-3 border-t border-border/50">
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="w-full bg-primary hover:bg-primary/90"
+                          onClick={() => handleCopyCaption(caption)}
+                        >
+                          <Copy className="w-4 h-4 mr-2" />
+                          Copy Caption
+                        </Button>
                       </div>
                     </Card>
                   </motion.div>
@@ -772,19 +615,38 @@ const CaptionGenerator = () => {
             </>
           )}
 
-          {generatedCaptions.length === 0 && (
+          {generatedCaptions.length === 0 && !isGenerating && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="glass-card p-12 text-center"
+              className="relative overflow-hidden"
             >
-              <Sparkles className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                No captions yet
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Enter your content and click "Generate Captions" to get started
-              </p>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 rounded-2xl"></div>
+              <div className="relative glass-card p-12 text-center border-2 border-dashed border-border/50 rounded-2xl">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                  <Sparkles className="w-10 h-10 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-3">
+                  Ready to Generate Perfect Caption?
+                </h3>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed">
+                  Enter your content, select your platform and tone, then let our AI create the perfect caption for you.
+                </p>
+                <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-primary"></div>
+                    <span>Perfect Quality</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-accent"></div>
+                    <span>AI-Powered</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span>Auto-Saved</span>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           )}
         </div>
