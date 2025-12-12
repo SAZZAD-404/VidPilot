@@ -9,7 +9,7 @@ The ultimate all-in-one AI toolbox to create viral social media posts, YouTube s
 [![Supabase](https://img.shields.io/badge/Supabase-Enabled-success?logo=supabase)](https://supabase.com)
 [![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)](https://vercel.com)
 
-Live Demo → https://vidpilot.vercel.app (replace with your actual link)
+Live Demo → https://vidpilot.netlify.app/
 
 ## ✨ **Core Features**
 
