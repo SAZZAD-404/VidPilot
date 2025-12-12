@@ -1,5 +1,5 @@
 # 🚀 **VidPilot – AI-Powered Viral Content Creation Platform**  
-**Professional • Fast • 100% Free Core Features**  
+**Professional • Fast**  
 
 The ultimate all-in-one AI toolbox to create viral social media posts, YouTube scripts, captivating stories, and studio-quality voice-overs in seconds.
 
