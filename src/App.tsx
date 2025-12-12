@@ -18,6 +18,7 @@ import SavedCaptions from "./pages/dashboard/SavedCaptions";
 import SocialPostGenerator from "./pages/dashboard/SocialPostGenerator";
 import YouTubeStoryGenerator from "./pages/dashboard/YouTubeStoryGenerator";
 import History from "./pages/dashboard/History";
+import VoiceOverGenerator from "./pages/dashboard/VoiceOverGenerator";
 import Subscription from "./pages/dashboard/Subscription";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="captions" element={<CaptionGenerator />} />
               <Route path="social-posts" element={<SocialPostGenerator />} />
               <Route path="youtube-stories" element={<YouTubeStoryGenerator />} />
+              <Route path="voice-over" element={<VoiceOverGenerator />} />
               <Route path="history" element={<History />} />
               <Route path="library" element={<SavedCaptions />} />
               <Route path="subscription" element={<Subscription />} />

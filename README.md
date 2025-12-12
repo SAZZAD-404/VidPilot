@@ -1,8 +1,8 @@
-# 🚀 VidPilot - AI Social Media Content Generator
+# 🚀 VidPilot - AI Content Creation Platform
 
-Lightweight, free AI-powered platform for creating viral social media content. Generate captions and full posts for Instagram, TikTok, LinkedIn, Twitter, YouTube, and Facebook in seconds.
+Professional AI-powered platform for creating viral social media content, YouTube stories, and high-quality voice-overs. Generate captions, posts, stories, and professional voice-overs in seconds.
 
-## 🚀 Features
+## 🚀 Core Features
 
 ### 🎯 AI Caption Generator
 - **Multi-Platform Support** - Instagram, TikTok, LinkedIn, Twitter, YouTube
@@ -10,21 +10,32 @@ Lightweight, free AI-powered platform for creating viral social media content. G
 - **Smart Hashtags** - Auto-generate trending, relevant hashtags
 - **Language Support** - English & Bengali (বাংলা)
 - **Batch Generation** - Get 10 caption variations instantly
-- **Hybrid AI** - Choose between Quick (rule-based) or AI-powered (HuggingFace)
-- **100% Free** - Works with or without API keys
-- **Usage Tracking** - 100 captions/month free tier
-- **Save & Export** - Build your caption library, export to CSV
+- **Export Ready** - Copy or download as CSV
 
-### 📱 AI Social Media Post Generator (NEW!)
+### 📱 AI Social Media Post Generator
 - **5 Platforms** - Facebook, Instagram, LinkedIn, Twitter/X, YouTube
 - **7 Tone Styles** - Funny, Professional, Emotional, Trendy, Minimal, Storytelling, Marketing
 - **3 Post Lengths** - Short, Medium, Long (platform-optimized)
 - **Smart Hashtags** - Platform-specific trending hashtags
 - **CTA Options** - Include call-to-action buttons
-- **3 Variations** - Get 3 unique post variations instantly
-- **Hybrid AI** - Choose between Quick (rule-based) or AI-powered (HuggingFace)
-- **100% Free** - Works with or without API keys
-- **Export Ready** - Copy or download as CSV
+
+### 📖 AI YouTube Story Generator
+- **6 Genres** - Educational, Entertainment, Lifestyle, Tech, Business, Gaming
+- **6 Durations** - Short (1-3min), Medium (5-10min), Long (15-20min), Extended (30-45min), Documentary (60+min), Epic (120+min)
+- **8 Tone Styles** - Professional, Casual, Funny, Dramatic, Inspiring, Energetic, Calm, Authoritative
+- **Multi-Language** - English, Bengali, Hindi, Spanish, French, German
+- **SEO Optimized** - Titles, descriptions, tags, hashtags, keywords
+- **Professional Templates** - Podcast, Commercial, Documentary, Audiobook, Presentation, YouTube
+
+### 🎤 AI Voice-Over Generator
+- **Multiple TTS Providers** - OpenAI TTS Official, Murf.ai Professional, Browser TTS (Free)
+- **6 Voice Types** - Male, Female, Neutral, Child, Elderly, Robotic
+- **8 Tone Variations** - Professional, Casual, Energetic, Calm, Dramatic, Friendly, Authoritative, Emotional
+- **5 Speed Options** - Very Slow, Slow, Normal, Fast, Very Fast
+- **5 Quality Levels** - Standard (Free), High, Premium, Studio, Broadcast
+- **Professional Features** - Pitch control, volume adjustment, emphasis levels, audio processing
+- **Multi-Language** - English, Bengali, Hindi, Spanish, French, German
+- **Export Formats** - MP3, WAV, OGG, FLAC, M4A
 
 ## 🛠️ Tech Stack
 
@@ -47,7 +58,7 @@ Lightweight, free AI-powered platform for creating viral social media content. G
 
 ```bash
 git clone <your-repo-url>
-cd vidpilot2
+cd vidpilot
 ```
 
 ### 2. Install Dependencies

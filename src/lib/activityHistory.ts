@@ -14,6 +14,9 @@ export interface Activity {
     hashtags?: string[];
     variations?: number;
     format?: string;
+    genre?: string;
+    duration?: string;
+    engagementScore?: number;
   };
   created_at: string;
 }
@@ -82,6 +85,24 @@ export const activityHistory = {
         tone: options.tone,
         variations: posts.length,
         hashtags: posts[0]?.hashtags || [],
+      },
+    });
+  },
+
+  // Add YouTube story generation activity
+  addYouTubeStoryGeneration(story: any, options: any): Activity {
+    return this.add({
+      type: 'video',
+      title: `Generated YouTube Story: ${story.title}`,
+      content: story.story.substring(0, 200) + '...',
+      metadata: {
+        platform: 'youtube',
+        tone: options.tone,
+        language: options.language,
+        genre: options.genre,
+        duration: options.duration,
+        engagementScore: story.engagementScore,
+        hashtags: story.hashtags || [],
       },
     });
   },

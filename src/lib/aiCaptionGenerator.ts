@@ -8,6 +8,7 @@ const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 const ZAI_API_URL = 'https://api.z.ai/v1/chat/completions';
+const OPENAI_FM_API_URL = 'https://api.openai.fm/v1/chat/completions';
 
 
 

@@ -8,7 +8,9 @@ import {
   ArrowRight,
   FileText,
   Download,
-  Video
+  Video,
+  Calendar,
+  Mic
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -46,34 +48,36 @@ const DashboardHome = () => {
   const currentUsage = usageStats?.caption_generation || 0;
   const savedCount = captions.filter(c => c.saved).length;
 
+  const activityStats = activityHistory.getStats();
+  
   const stats = [
     { 
-      label: "Captions Generated", 
-      value: currentUsage.toString(), 
+      label: "Total Activities", 
+      value: activityStats.total.toString(), 
       icon: Sparkles, 
-      subtext: `${monthlyLimit - currentUsage} remaining this month`,
+      subtext: `${activityStats.today} created today`,
       color: "text-primary"
     },
     { 
-      label: "Total Captions", 
-      value: savedCount.toString(), 
+      label: "Captions Generated", 
+      value: activityStats.captions.toString(), 
       icon: Library, 
-      subtext: "In your history",
+      subtext: "AI-powered captions",
       color: "text-accent"
     },
     { 
-      label: "Most Used Platform", 
-      value: getMostUsedPlatform(), 
-      icon: TrendingUp, 
-      subtext: "This month",
-      color: "text-blue-500"
+      label: "Social Posts", 
+      value: activityStats.socialPosts.toString(), 
+      icon: Hash, 
+      subtext: "Multi-platform posts",
+      color: "text-purple-500"
     },
     { 
-      label: "Favorite Tone", 
-      value: getFavoriteTone(), 
-      icon: Hash, 
-      subtext: "Most generated",
-      color: "text-purple-500"
+      label: "YouTube Stories", 
+      value: recentActivities.filter(a => a.type === 'video').length.toString(), 
+      icon: Video, 
+      subtext: "Video stories created",
+      color: "text-red-500"
     },
   ];
 
@@ -109,6 +113,8 @@ const DashboardHome = () => {
         return Video;
       case 'export':
         return Download;
+      case 'schedule':
+        return Calendar;
       default:
         return FileText;
     }
@@ -124,6 +130,8 @@ const DashboardHome = () => {
         return 'text-red-500';
       case 'export':
         return 'text-blue-500';
+      case 'schedule':
+        return 'text-green-500';
       default:
         return 'text-accent';
     }
@@ -188,7 +196,7 @@ const DashboardHome = () => {
         className="glass-card p-6 mb-8"
       >
         <h2 className="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
           <Link to="/dashboard/captions">
             <div className="p-4 rounded-lg bg-secondary/30 border border-border hover:border-primary/50 transition-all cursor-pointer group">
               <Sparkles className="w-8 h-8 text-primary mb-3 group-hover:scale-110 transition-transform" />
@@ -210,6 +218,14 @@ const DashboardHome = () => {
               <Video className="w-8 h-8 text-red-500 mb-3 group-hover:scale-110 transition-transform" />
               <h3 className="font-semibold text-foreground mb-1">YouTube Stories</h3>
               <p className="text-sm text-muted-foreground">Engaging video stories</p>
+            </div>
+          </Link>
+
+          <Link to="/dashboard/voice-over">
+            <div className="p-4 rounded-lg bg-secondary/30 border border-border hover:border-primary/50 transition-all cursor-pointer group">
+              <Mic className="w-8 h-8 text-blue-500 mb-3 group-hover:scale-110 transition-transform" />
+              <h3 className="font-semibold text-foreground mb-1">AI Voice Over</h3>
+              <p className="text-sm text-muted-foreground">Professional voice overs</p>
             </div>
           </Link>
           

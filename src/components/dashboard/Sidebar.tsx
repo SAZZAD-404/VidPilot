@@ -9,7 +9,8 @@ import {
   Sparkles,
   MessageSquare,
   Eye,
-  Crown
+  Crown,
+  Mic
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ const navItems = [
   { icon: Sparkles, label: "Caption Generator", href: "/dashboard/captions" },
   { icon: MessageSquare, label: "Social Posts", href: "/dashboard/social-posts" },
   { icon: Video, label: "YouTube Stories", href: "/dashboard/youtube-stories" },
+  { icon: Mic, label: "AI Voice Over", href: "/dashboard/voice-over" },
   { icon: Library, label: "History", href: "/dashboard/history" },
   { icon: Crown, label: "Subscription", href: "/dashboard/subscription" },
   { icon: Settings, label: "Settings", href: "/dashboard/settings" },

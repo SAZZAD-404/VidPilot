@@ -11,7 +11,8 @@ import {
   Filter,
   Calendar,
   X,
-  RefreshCw
+  RefreshCw,
+  Video
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +30,7 @@ import {
 const activityIcons: Record<ActivityType, any> = {
   caption: Sparkles,
   social_post: MessageSquare,
-  video: Download,
+  video: Video,
   export: Download,
   schedule: Calendar,
 };
@@ -138,7 +139,7 @@ const History = () => {
       </motion.div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -164,6 +165,15 @@ const History = () => {
         >
           <p className="text-sm text-muted-foreground mb-1">Posts</p>
           <p className="text-2xl font-bold text-purple-500">{stats.socialPosts}</p>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.125 }}
+          className="glass-card p-4"
+        >
+          <p className="text-sm text-muted-foreground mb-1">Videos</p>
+          <p className="text-2xl font-bold text-red-500">{activities.filter(a => a.type === 'video').length}</p>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -220,6 +230,7 @@ const History = () => {
               <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="caption">Captions</SelectItem>
               <SelectItem value="social_post">Social Posts</SelectItem>
+              <SelectItem value="video">YouTube Stories</SelectItem>
               <SelectItem value="export">Exports</SelectItem>
             </SelectContent>
           </Select>
@@ -331,6 +342,21 @@ const History = () => {
                         {activity.metadata.language && (
                           <span className="text-xs px-2 py-1 rounded-full bg-blue-500/10 text-blue-500 capitalize">
                             {activity.metadata.language}
+                          </span>
+                        )}
+                        {activity.metadata.genre && (
+                          <span className="text-xs px-2 py-1 rounded-full bg-green-500/10 text-green-500 capitalize">
+                            {activity.metadata.genre}
+                          </span>
+                        )}
+                        {activity.metadata.duration && (
+                          <span className="text-xs px-2 py-1 rounded-full bg-orange-500/10 text-orange-500 capitalize">
+                            {activity.metadata.duration}
+                          </span>
+                        )}
+                        {activity.metadata.engagementScore && (
+                          <span className="text-xs px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-500">
+                            {activity.metadata.engagementScore}/100 Score
                           </span>
                         )}
                         {activity.metadata.variations && (
